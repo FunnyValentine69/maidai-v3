@@ -4,6 +4,7 @@ import random
 
 from .ai import generate_response
 from .config import GREETINGS
+from .tts import speak, stop_speaking
 from .ui import (
     display_greeting,
     display_message,
@@ -24,6 +25,8 @@ def run() -> None:
     # Pick random greeting and display
     greeting, emotion = random.choice(GREETINGS)
     display_greeting(greeting, emotion)
+    if warning := speak(greeting):
+        display_status(warning)
 
     display_status("Type your message and press Enter. Press Ctrl+C to exit.")
 
@@ -32,6 +35,7 @@ def run() -> None:
         while True:
             # Get user input
             user_input = get_input()
+            stop_speaking()
 
             # Skip empty input
             if not user_input:
@@ -52,6 +56,8 @@ def run() -> None:
 
             # Display response
             display_message("assistant", response_text, emotion)
+            if warning := speak(response_text):
+                display_status(warning)
 
     except KeyboardInterrupt:
         print()  # New line after ^C
