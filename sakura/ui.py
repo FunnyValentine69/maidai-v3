@@ -1,5 +1,10 @@
 """Rich terminal interface for Sakura."""
 
+import sys
+import termios
+import tty
+from typing import Literal
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -80,6 +85,73 @@ def get_input() -> str:
         return ""
     except KeyboardInterrupt:
         raise
+
+
+def get_input_with_voice() -> tuple[str, Literal["text", "voice"]]:
+    """Get user input, supporting both text and voice.
+
+    Press SPACE as first character to trigger voice input.
+    Otherwise, type normally.
+
+    Returns:
+        Tuple of (user_text, input_mode).
+    """
+    from .speech import is_available, listen
+
+    # Show prompt with voice hint if available
+    if is_available():
+        console.print("[cyan]You[/cyan] [dim](SPACE=speak)[/dim]: ", end="")
+    else:
+        console.print("[cyan]You:[/cyan] ", end="")
+
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+
+    try:
+        tty.setcbreak(fd)
+        buffer: list[str] = []
+
+        while True:
+            char = sys.stdin.read(1)
+
+            # Space as first char = voice input
+            if char == " " and not buffer and is_available():
+                console.print()  # New line
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+                text = listen()
+                if text:
+                    return text, "voice"
+                else:
+                    # Fallback to text input
+                    display_status("Please type instead")
+                    return get_input(), "text"
+
+            # Enter = submit
+            elif char in ("\n", "\r"):
+                console.print()  # New line
+                return "".join(buffer).strip(), "text"
+
+            # Backspace
+            elif char == "\x7f":
+                if buffer:
+                    buffer.pop()
+                    sys.stdout.write("\b \b")
+                    sys.stdout.flush()
+
+            # Ctrl+C
+            elif char == "\x03":
+                console.print()
+                raise KeyboardInterrupt
+
+            # Regular character
+            else:
+                buffer.append(char)
+                sys.stdout.write(char)
+                sys.stdout.flush()
+
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
 def display_status(text: str) -> None:

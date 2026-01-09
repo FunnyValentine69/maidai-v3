@@ -4,13 +4,14 @@ import random
 
 from .ai import generate_response
 from .config import GREETINGS
+from .speech import init as init_speech
 from .tts import speak, stop_speaking
 from .ui import (
     display_greeting,
     display_message,
     display_status,
     display_welcome,
-    get_input,
+    get_input_with_voice,
 )
 
 
@@ -22,19 +23,23 @@ def run() -> None:
     # Show welcome banner
     display_welcome()
 
+    # Initialize voice input
+    display_status("Loading voice models...")
+    init_speech()
+
     # Pick random greeting and display
     greeting, emotion = random.choice(GREETINGS)
     display_greeting(greeting, emotion)
     if warning := speak(greeting):
         display_status(warning)
 
-    display_status("Type your message and press Enter. Press Ctrl+C to exit.")
+    display_status("Type message or press [SPACE] to speak. Ctrl+C to exit.")
 
     # Main conversation loop
     try:
         while True:
-            # Get user input
-            user_input = get_input()
+            # Get user input (text or voice)
+            user_input, _ = get_input_with_voice()
             stop_speaking()
 
             # Skip empty input

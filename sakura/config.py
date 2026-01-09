@@ -20,8 +20,13 @@ TTS_VOICE = "ja-JP-NanamiNeural"
 TTS_PITCH = "+25Hz"
 TTS_RATE = "+5%"
 
-# Whisper settings
+# Voice input settings
 WHISPER_MODEL = "small"
+SAMPLE_RATE = 16000
+VAD_CHUNK_MS = 30
+VAD_SPEECH_THRESHOLD = 0.5
+SILENCE_THRESHOLD_S = 1.0
+MAX_RECORDING_S = 30.0
 
 # Image generation settings (local with diffusers)
 IMAGE_MODEL = "cagliostrolab/animagine-xl-4.0"
