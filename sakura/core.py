@@ -4,6 +4,7 @@ import random
 
 from .ai import generate_response
 from .config import GREETINGS
+from .emotions import display_emotion
 from .speech import init as init_speech
 from .tts import speak, stop_speaking
 from .ui import (
@@ -29,6 +30,7 @@ def run() -> None:
 
     # Pick random greeting and display
     greeting, emotion = random.choice(GREETINGS)
+    display_emotion(emotion)
     display_greeting(greeting, emotion)
     if warning := speak(greeting):
         display_status(warning)

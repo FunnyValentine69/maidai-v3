@@ -10,6 +10,8 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.theme import Theme
 
+from .emotions import display_emotion
+
 # Cherry blossom theme
 SAKURA_THEME = Theme({
     "sakura": "magenta",
@@ -45,6 +47,8 @@ def display_greeting(text: str, emotion: str = "neutral") -> None:
 def display_message(role: str, text: str, emotion: str | None = None) -> None:
     """Display a conversation message."""
     if role == "assistant":
+        if emotion:
+            display_emotion(emotion)
         header = Text()
         header.append("🌸 Sakura", style="sakura.name")
         if emotion:
