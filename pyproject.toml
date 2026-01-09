@@ -1,0 +1,13 @@
+[project]
+name = "maidai-v3"
+version = "0.1.0"
+description = "Sakura - A tsundere Japanese maid AI assistant"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[project.scripts]
+sakura = "sakura.core:run"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
