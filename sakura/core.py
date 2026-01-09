@@ -1,10 +1,11 @@
 """Main conversation loop for Sakura."""
 
-import random
+from datetime import datetime
 
-from .ai import generate_response
-from .config import GREETINGS
+from .ai import generate_greeting, generate_response
+from .config import MAX_RECENT_MESSAGES
 from .emotions import display_emotion
+from .memory import generate_session_id, load_memory, load_summary, save_session, summarize_if_needed
 from .speech import init as init_speech
 from .tts import speak, stop_speaking
 from .ui import (
@@ -18,8 +19,10 @@ from .ui import (
 
 def run() -> None:
     """Run the main conversation loop."""
-    # Track conversation history (in-memory for Phase 1)
-    messages: list[dict] = []
+    # Generate session ID and load memory
+    session_id = generate_session_id()
+    summary_data, recent_messages = load_memory()
+    session_messages: list[dict] = []  # Current session only (this gets saved)
 
     # Show welcome banner
     display_welcome()
@@ -28,8 +31,9 @@ def run() -> None:
     display_status("Loading voice models...")
     init_speech()
 
-    # Pick random greeting and display
-    greeting, emotion = random.choice(GREETINGS)
+    # Generate context-aware greeting (or random if no memory)
+    display_status("Preparing greeting...")
+    greeting, emotion = generate_greeting(summary_data, recent_messages)
     display_emotion(emotion)
     display_greeting(greeting, emotion)
     if warning := speak(greeting):
@@ -48,17 +52,23 @@ def run() -> None:
             if not user_input:
                 continue
 
-            # Add user message to history
-            messages.append({"role": "user", "content": user_input})
+            # Add user message to session history with timestamp
+            session_messages.append({
+                "role": "user",
+                "content": user_input,
+                "timestamp": datetime.now().isoformat(),
+            })
 
-            # Generate response
-            response_text, emotion = generate_response(messages)
+            # Generate response (combine recent + session messages for context)
+            all_messages = recent_messages + session_messages
+            response_text, emotion = generate_response(all_messages, summary_data)
 
-            # Add assistant message to history (with emotion for Phase 4)
-            messages.append({
+            # Add assistant message to session history
+            session_messages.append({
                 "role": "assistant",
                 "content": response_text,
                 "emotion": emotion,
+                "timestamp": datetime.now().isoformat(),
             })
 
             # Display response
@@ -66,6 +76,22 @@ def run() -> None:
             if warning := speak(response_text):
                 display_status(warning)
 
+            # Auto-save every 10 messages for crash safety
+            if len(session_messages) % 10 == 0:
+                save_session(session_id, session_messages)
+
+            # Check if total context exceeds limit
+            total_context = len(recent_messages) + len(session_messages)
+            if total_context > MAX_RECENT_MESSAGES:
+                if summarize_if_needed(recent_messages, session_messages, force=False):
+                    recent_messages = []  # Clear old messages
+                    summary_data = load_summary()  # Reload fresh summary
+
     except KeyboardInterrupt:
         print()  # New line after ^C
+        # Only save if we have messages (skip empty sessions)
+        if session_messages:
+            display_status("Saving conversation...")
+            save_session(session_id, session_messages)
+            summarize_if_needed(recent_messages, session_messages, force=True)
         display_status("Sayonara, Goshujin-sama~ 🌸")

@@ -64,7 +64,50 @@ EMOTION_PROMPTS = {
     "playful": "winking, mischievous smile",
 }
 
-# Random greetings with emotions (used before memory is implemented)
+# Memory settings
+MAX_RECENT_MESSAGES = 50      # Keep full detail for last N messages
+MAX_SESSIONS_TO_LOAD = 3      # Load N most recent session files
+MAX_SUMMARY_WORDS = 2000      # Compress summary if it exceeds this
+
+# Summarization prompt for Ollama
+SUMMARIZATION_PROMPT = """You are summarizing a conversation between Sakura (a tsundere maid AI) and her Goshujin-sama (master).
+
+Create a concise summary that captures:
+1. Key topics discussed
+2. Important facts learned about Goshujin-sama (preferences, habits, personal info)
+3. Notable emotional moments or relationship development
+4. Any promises made or tasks mentioned
+
+Keep the summary under 200 words. Focus on information Sakura should remember for future conversations.
+{existing_summary_section}
+
+Recent conversation to summarize:
+{messages_text}
+
+Respond with JSON only:
+{{"summary": "Updated cumulative summary...", "key_facts": ["fact1", "fact2", ...]}}"""
+
+# Greeting prompt for context-aware greetings
+GREETING_PROMPT = """You are Sakura, a tsundere maid. Generate a greeting for Goshujin-sama.
+
+{memory_context}
+
+Generate a SHORT greeting (1-2 sentences) that:
+- References something from your memory if relevant
+- Maintains your tsundere personality
+- Sounds natural, not like reading a summary
+
+Start with [EMOTION:name] tag.
+
+Valid emotions: happy, sad, angry, surprised, shy, thinking, excited, tired, confused, neutral, love, worried, proud, playful
+
+Examples:
+[EMOTION:shy] Oh, you're back, Goshujin-sama... I remembered you like your tea hot. N-not that I was thinking about it!
+[EMOTION:playful] Hmph, finally awake? I've been waiting... not that I was counting the hours or anything!
+
+Generate greeting:"""
+
+# Random greetings with emotions (fallback when no memory exists)
 GREETINGS = [
     ("Hmph, you're finally here, Goshujin-sama. I've been waiting... N-not that I was worried or anything!", "shy"),
     ("Oh, it's you, Goshujin-sama. I suppose I have no choice but to assist you today...", "neutral"),
