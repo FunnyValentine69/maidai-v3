@@ -25,7 +25,7 @@ console = Console()
 # Animagine XL 4.0 recommended settings
 GUIDANCE_SCALE = 5
 NUM_INFERENCE_STEPS = 28
-IMG2IMG_STRENGTH = 0.4
+IMG2IMG_STRENGTH = 0.75
 
 # Quality tags for Animagine XL 4.0
 QUALITY_TAGS = "masterpiece, high score, great score, absurdres"
@@ -170,12 +170,13 @@ def main():
         "--emotion", "-e",
         type=str,
         choices=EMOTIONS,
-        help="Generate only specific emotion (for testing)",
+        nargs='+',
+        help="Generate only specific emotion(s)",
     )
     args = parser.parse_args()
 
     # Determine which emotions to generate
-    target_emotions = [args.emotion] if args.emotion else EMOTIONS.copy()
+    target_emotions = args.emotion if args.emotion else EMOTIONS.copy()
 
     # Ensure cache directory exists
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -183,7 +184,7 @@ def main():
     # Check if neutral base needs regeneration
     neutral_path = CACHE_DIR / "neutral.png"
     need_new_neutral = (
-        args.force
+        (args.force and "neutral" in target_emotions)
         or not neutral_path.exists()
         or not check_image_size(neutral_path, args.size)
     )

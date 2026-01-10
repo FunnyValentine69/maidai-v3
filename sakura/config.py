@@ -49,17 +49,17 @@ CHARACTER_BASE_PROMPT = (
 # Emotion-specific prompt additions
 EMOTION_PROMPTS = {
     "happy": "smiling, cheerful expression",
-    "sad": "teary eyes, downcast expression",
+    "sad": "crying, tears streaming down face, sobbing, very sad expression, watery eyes, heartbroken",
     "angry": "furrowed brows, annoyed expression",
     "surprised": "wide eyes, open mouth, shocked",
     "shy": "blushing, looking away, embarrassed",
-    "thinking": "finger on chin, contemplative look",
-    "excited": "sparkly eyes, energetic pose",
-    "tired": "droopy eyes, yawning",
+    "thinking": "closed eyes, peaceful contemplation, serene thinking, deep thought, eyes closed, meditating",
+    "excited": "big bright smile, sparkling eyes, open mouth laughing, extremely happy, energetic pose",
+    "tired": "exhausted, half-closed sleepy eyes, yawning with open mouth, drowsy expression, very sleepy, dark circles under eyes",
     "confused": "tilted head, question mark",
     "neutral": "calm expression",
-    "love": "soft smile, warm eyes, hearts",
-    "worried": "concerned expression, slight frown",
+    "love": "lovestruck, heart eyes, blushing deeply, dreamy loving expression, floating hearts, adoring gaze, infatuated smile",
+    "worried": "very anxious, furrowed brows, biting lip nervously, stressed expression, concerned eyes, sweat drop, uneasy",
     "proud": "confident smirk, hands on hips",
     "playful": "winking, mischievous smile",
 }
