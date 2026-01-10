@@ -13,6 +13,7 @@ numpy>=1.24.0
 scipy>=1.10.0
 torch>=2.0.0
 torchaudio>=2.0.0
+pydub>=0.25.0  # For bilingual audio concatenation (requires ffmpeg)
 
 # Image generation (local)
 diffusers>=0.25.0

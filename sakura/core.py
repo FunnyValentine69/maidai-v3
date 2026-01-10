@@ -4,13 +4,11 @@ from datetime import datetime
 
 from .ai import generate_greeting, generate_response
 from .config import MAX_RECENT_MESSAGES
-from .emotions import display_emotion
 from .memory import generate_session_id, load_memory, load_summary, save_session, summarize_if_needed
 from .speech import init as init_speech
-from .tts import speak, stop_speaking
+from .tts import speak_bilingual, stop_speaking
 from .ui import (
-    display_greeting,
-    display_message,
+    display_bilingual_message,
     display_status,
     display_welcome,
     get_input_with_voice,
@@ -33,10 +31,9 @@ def run() -> None:
 
     # Generate context-aware greeting (or random if no memory)
     display_status("Preparing greeting...")
-    greeting, emotion = generate_greeting(summary_data, recent_messages)
-    display_emotion(emotion)
-    display_greeting(greeting, emotion)
-    if warning := speak(greeting):
+    jp_greeting, en_greeting, emotion = generate_greeting(summary_data, recent_messages)
+    display_bilingual_message(emotion, jp_greeting, en_greeting)
+    if warning := speak_bilingual(jp_greeting, en_greeting):
         display_status(warning)
 
     display_status("Type message or press [SPACE] to speak. Ctrl+C to exit.")
@@ -61,19 +58,19 @@ def run() -> None:
 
             # Generate response (combine recent + session messages for context)
             all_messages = recent_messages + session_messages
-            response_text, emotion = generate_response(all_messages, summary_data)
+            japanese, english, emotion = generate_response(all_messages, summary_data)
 
-            # Add assistant message to session history
+            # Add assistant message to session history (English only for AI context)
             session_messages.append({
                 "role": "assistant",
-                "content": response_text,
+                "content": english,
                 "emotion": emotion,
                 "timestamp": datetime.now().isoformat(),
             })
 
-            # Display response
-            display_message("assistant", response_text, emotion)
-            if warning := speak(response_text):
+            # Display bilingual response
+            display_bilingual_message(emotion, japanese, english)
+            if warning := speak_bilingual(japanese, english):
                 display_status(warning)
 
             # Auto-save every 10 messages for crash safety

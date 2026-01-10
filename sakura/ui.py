@@ -17,6 +17,8 @@ SAKURA_THEME = Theme({
     "sakura": "magenta",
     "sakura.name": "bold magenta",
     "sakura.emotion": "italic bright_magenta",
+    "sakura.japanese": "bright_white",
+    "sakura.english": "dim white",
     "user": "cyan",
     "user.name": "bold cyan",
     "status": "dim white",
@@ -26,15 +28,32 @@ SAKURA_THEME = Theme({
 console = Console(theme=SAKURA_THEME)
 
 
-def display_greeting(text: str, emotion: str = "neutral") -> None:
-    """Display Sakura's greeting message."""
+def display_bilingual_message(emotion: str, japanese: str, english: str) -> None:
+    """Display Sakura's bilingual message in JRPG style.
+
+    Shows emotion image above, then a panel with:
+    - Header: 🌸 Sakura [emotion]
+    - Japanese text (bright white)
+    - English text (dim gray)
+    """
+    # Display emotion image first
+    display_emotion(emotion)
+
+    # Build header
     header = Text()
     header.append("🌸 Sakura", style="sakura.name")
     header.append(" ", style="default")
     header.append(f"[{emotion}]", style="sakura.emotion")
 
+    # Build content with both languages
+    content = Text()
+    if japanese:
+        content.append(japanese, style="sakura.japanese")
+        content.append("\n\n", style="default")
+    content.append(english, style="sakura.english")
+
     panel = Panel(
-        Text(text, style="sakura"),
+        content,
         title=header,
         title_align="left",
         border_style="magenta",
@@ -44,38 +63,19 @@ def display_greeting(text: str, emotion: str = "neutral") -> None:
     console.print()
 
 
-def display_message(role: str, text: str, emotion: str | None = None) -> None:
-    """Display a conversation message."""
-    if role == "assistant":
-        if emotion:
-            display_emotion(emotion)
-        header = Text()
-        header.append("🌸 Sakura", style="sakura.name")
-        if emotion:
-            header.append(" ", style="default")
-            header.append(f"[{emotion}]", style="sakura.emotion")
+def display_user_message(text: str) -> None:
+    """Display a user message."""
+    header = Text()
+    header.append("You", style="user.name")
 
-        panel = Panel(
-            Text(text, style="sakura"),
-            title=header,
-            title_align="left",
-            border_style="magenta",
-            padding=(0, 1),
-        )
-        console.print(panel)
-    else:
-        header = Text()
-        header.append("You", style="user.name")
-
-        panel = Panel(
-            Text(text, style="user"),
-            title=header,
-            title_align="left",
-            border_style="cyan",
-            padding=(0, 1),
-        )
-        console.print(panel)
-
+    panel = Panel(
+        Text(text, style="user"),
+        title=header,
+        title_align="left",
+        border_style="cyan",
+        padding=(0, 1),
+    )
+    console.print(panel)
     console.print()
 
 
