@@ -6,9 +6,15 @@ import re
 
 import ollama
 
-from .config import OLLAMA_MODEL, SYSTEM_PROMPT, EMOTIONS, GREETING_PROMPT, GREETINGS
+from .config import OLLAMA_MODEL, SYSTEM_PROMPT, EMOTIONS, EMOTION_ALIASES, GREETING_PROMPT, GREETINGS
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_emotion(emotion: str) -> str:
+    """Map emotion aliases to valid emotions."""
+    emotion = emotion.lower()
+    return EMOTION_ALIASES.get(emotion, emotion)
 
 
 def parse_emotion(response: str) -> tuple[str, str]:
@@ -25,7 +31,7 @@ def parse_emotion(response: str) -> tuple[str, str]:
     pattern1 = r'^\[EMOTION:(\w+)\]\s*'
     match = re.match(pattern1, response, re.IGNORECASE)
     if match:
-        emotion = match.group(1).lower()
+        emotion = _normalize_emotion(match.group(1))
         clean_text = re.sub(pattern1, '', response, flags=re.IGNORECASE).strip()
         if emotion in EMOTIONS:
             return clean_text, emotion
@@ -36,7 +42,7 @@ def parse_emotion(response: str) -> tuple[str, str]:
     pattern2 = r'^\[\w+:(\w+)\]\s*'
     match = re.match(pattern2, response)
     if match:
-        emotion = match.group(1).lower()
+        emotion = _normalize_emotion(match.group(1))
         clean_text = re.sub(pattern2, '', response).strip()
         if emotion in EMOTIONS:
             return clean_text, emotion
@@ -47,7 +53,7 @@ def parse_emotion(response: str) -> tuple[str, str]:
     pattern3 = r'^\[(\w+)\]\s*'
     match = re.match(pattern3, response)
     if match:
-        emotion = match.group(1).lower()
+        emotion = _normalize_emotion(match.group(1))
         clean_text = re.sub(pattern3, '', response).strip()
         if emotion in EMOTIONS:
             return clean_text, emotion

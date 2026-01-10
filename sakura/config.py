@@ -39,6 +39,31 @@ EMOTIONS = [
     "love", "worried", "proud", "playful"
 ]
 
+# Map similar/alternate emotions to valid ones
+EMOTION_ALIASES = {
+    "shocked": "surprised",
+    "depressed": "sad",
+    "anxious": "worried",
+    "nervous": "worried",
+    "embarrassed": "shy",
+    "flustered": "shy",
+    "blushing": "shy",
+    "annoyed": "angry",
+    "frustrated": "angry",
+    "cheerful": "happy",
+    "joyful": "happy",
+    "bored": "tired",
+    "sleepy": "tired",
+    "curious": "thinking",
+    "pondering": "thinking",
+    "affectionate": "love",
+    "loving": "love",
+    "smug": "proud",
+    "confident": "proud",
+    "teasing": "playful",
+    "mischievous": "playful",
+}
+
 # Character image base prompt
 CHARACTER_BASE_PROMPT = (
     "anime girl, pink hair, twin tails, blue eyes, maid outfit, "

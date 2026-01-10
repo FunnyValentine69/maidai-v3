@@ -1,6 +1,7 @@
 """Text-to-speech output for Sakura using Edge TTS."""
 
 import asyncio
+import re
 import logging
 import subprocess
 import tempfile
@@ -17,6 +18,21 @@ logger = logging.getLogger(__name__)
 _current_playback: Optional[subprocess.Popen] = None
 _tts_disabled: bool = False
 _tts_warned: bool = False
+
+
+def _clean_text_for_tts(text: str) -> str:
+    """Remove action markers and problematic characters for TTS."""
+    # Remove asterisk-wrapped actions like *blushes*, *looks away*
+    text = re.sub(r'\*[^*]+\*', '', text)
+    # Replace ellipsis with comma for natural pause (otherwise reads as "ten-ten")
+    text = text.replace('...', ',')
+    text = text.replace('…', ',')
+    # Collapse adjacent commas to single comma with space (e.g., ", ," → ", ")
+    text = re.sub(r',(\s*,)+', ', ', text)
+    # Clean up extra whitespace
+    text = ' '.join(text.split())
+    # Remove leading/trailing commas
+    return text.strip(' ,')
 
 
 async def _generate_audio(text: str, output_path: Path) -> bool:
@@ -91,7 +107,7 @@ def speak(text: str) -> Optional[str]:
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
             audio_path = Path(f.name)
 
-        if not asyncio.run(_generate_audio(text, audio_path)):
+        if not asyncio.run(_generate_audio(_clean_text_for_tts(text), audio_path)):
             audio_path.unlink(missing_ok=True)
             if not _tts_warned:
                 _tts_warned = True
