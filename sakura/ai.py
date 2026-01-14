@@ -82,6 +82,9 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     """
     emotion = "neutral"
 
+    # Dedupe if prefix prompting caused double emotion tag
+    response = re.sub(r'\[EMOTION:\[EMOTION:', '[EMOTION:', response, flags=re.IGNORECASE)
+
     # Normalize em-dash to triple hyphen
     response = response.replace("—", "---")
 
@@ -209,10 +212,15 @@ def generate_response(messages: list[dict], summary_data: dict | None = None) ->
 
     full_messages = [{"role": "system", "content": context_prompt}] + messages
 
+    # Prefix prompting: add partial assistant message to force format start
+    full_messages.append({"role": "assistant", "content": "[EMOTION:"})
+
     for attempt in range(2):
         try:
             response = ollama.chat(model=OLLAMA_MODEL, messages=full_messages)
             raw_response = response['message']['content']
+            # Prepend the prefix we used (model continues from it)
+            raw_response = "[EMOTION:" + raw_response
             return parse_bilingual_response(raw_response)
         except Exception as e:
             if attempt == 0:

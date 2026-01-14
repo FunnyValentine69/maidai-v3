@@ -60,10 +60,11 @@ def run() -> None:
             all_messages = recent_messages + session_messages
             japanese, english, emotion = generate_response(all_messages, summary_data)
 
-            # Add assistant message to session history (English only for AI context)
+            # Store full bilingual format so model learns the pattern
+            bilingual_content = f"{japanese}\n---\n{english}" if japanese else english
             session_messages.append({
                 "role": "assistant",
-                "content": english,
+                "content": bilingual_content,
                 "emotion": emotion,
                 "timestamp": datetime.now().isoformat(),
             })
