@@ -62,6 +62,7 @@ EMOTION_ALIASES = {
     "confident": "proud",
     "teasing": "playful",
     "mischievous": "playful",
+    "satisfied": "happy",
 }
 
 # Character image base prompt

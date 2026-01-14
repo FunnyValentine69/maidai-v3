@@ -25,6 +25,8 @@ def _clean_text_for_tts(text: str) -> str:
     """Remove action markers and problematic characters for TTS."""
     # Remove asterisk-wrapped actions like *blushes*, *looks away*
     text = re.sub(r'\*[^*]+\*', '', text)
+    # Remove parenthetical notes like (Note: ...) or (Translation: ...)
+    text = re.sub(r'\([^)]*\)', '', text)
     # Replace ellipsis with comma for natural pause (otherwise reads as "ten-ten")
     text = text.replace('...', ',')
     text = text.replace('…', ',')
