@@ -35,6 +35,39 @@ def _strip_duplicate_actions(text: str) -> str:
     return result.strip()
 
 
+def _ensure_separator(text: str) -> str:
+    """Insert --- separator if JP and EN are mixed without one.
+
+    Handles case where model outputs both languages on same line:
+    *にやりと笑う* 日本語テキスト *giggles* English text
+    """
+    if "---" in text:
+        return text
+
+    # Check for both Japanese and English content
+    jp_chars = r'[\u3040-\u30ff\u4e00-\u9fff]'  # hiragana, katakana, kanji
+    en_words = r'[a-zA-Z]{3,}'  # 3+ consecutive letters
+
+    if not (re.search(jp_chars, text) and re.search(en_words, text)):
+        return text
+
+    # Find last Japanese character (including JP punctuation)
+    jp_end_pattern = r'[\u3040-\u30ff\u4e00-\u9fff。、！？…]'
+
+    last_jp_pos = -1
+    for match in re.finditer(jp_end_pattern, text):
+        last_jp_pos = match.end()
+
+    if last_jp_pos > 0 and last_jp_pos < len(text) - 1:
+        before = text[:last_jp_pos].strip()
+        after = text[last_jp_pos:].strip()
+        if before and after:
+            logger.debug(f"Inserted --- separator at position {last_jp_pos}")
+            return f"{before}\n---\n{after}"
+
+    return text
+
+
 # Priority-based keyword tiers for text emotion detection
 _HIGH_PRIORITY_KEYWORDS = {
     "shy": ["blush", "redden", "fluster", "embarrass"],
@@ -95,9 +128,12 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     - Multiple --- → use first separator only
     - Em-dash — → normalize to ---
     - Empty JP section → return empty string
-    - No separator → treat entire text as English, JP empty
+    - No separator → try to insert, else treat as English only
     - Multiple emotion tags → use first found, strip all
     """
+    # Try to insert --- separator if missing but both JP/EN present
+    response = _ensure_separator(response)
+
     emotion = "neutral"
 
     # Dedupe if prefix prompting caused double emotion tag
