@@ -10,8 +10,8 @@ MaidAI v3 is a Japanese maid AI assistant named **Sakura** with a tsundere perso
 # Install dependencies
 pip install -r requirements.txt
 
-# Ensure Ollama is running with llama3.2
-ollama pull llama3.2
+# Ensure Ollama is running with dolphin-mistral
+ollama pull dolphin-mistral
 
 # Generate emotion images (one-time setup)
 python -m sakura.setup
@@ -24,7 +24,7 @@ python -m sakura
 
 | Component | Technology |
 |-----------|------------|
-| AI Model | Ollama + llama3.2 (local) |
+| AI Model | Ollama + dolphin-mistral (local, uncensored) |
 | Speech Recognition | faster-whisper (local) |
 | Text-to-Speech | Edge TTS (ja-JP-NanamiNeural, pitch +25Hz, rate +5%) |
 | Audio Playback | afplay (macOS) |

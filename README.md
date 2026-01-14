@@ -2,13 +2,16 @@
 
 A tsundere Japanese maid AI that runs entirely on local AI. Voice chat with your own personal maid who speaks in bilingual JRPG-style dialogue.
 
+> **Actively in Development** - New features added regularly
+
 ## Features
 
-- **Local AI** - Powered by Ollama (llama3.2), no cloud AI required
-- **Bilingual Dialogue** - Japanese first, English translation below (JRPG style)
+- **Bilingual JP/EN Dialogue** - Japanese first, English translation below (JRPG style)
+- **Uncensored Personality** - Powered by dolphin-mistral for unrestricted conversations
+- **14 Emotion Expressions** - Dynamic emotion detection with fallback system
+- **Local AI** - Runs entirely on Ollama, no cloud AI required
 - **Voice Input** - Speak naturally with mlx-whisper + silero-vad (Apple Silicon optimized)
 - **Text-to-Speech** - Nanami voice via Edge TTS (+25Hz pitch, +5% rate)
-- **Emotion Images** - 14 emotion expressions generated with Animagine XL 4.0
 - **Conversation Memory** - Persistent memory across sessions with automatic summarization
 - **Tsundere Personality** - Sakura is cold at first but gradually warms up to you
 
@@ -37,7 +40,7 @@ cd maidai-v3
 pip install -r requirements.txt
 
 # Pull the AI model
-ollama pull llama3.2
+ollama pull dolphin-mistral
 
 # Set your Hugging Face token
 export HF_API_TOKEN=your_token_here
