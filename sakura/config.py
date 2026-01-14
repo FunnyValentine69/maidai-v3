@@ -63,6 +63,7 @@ EMOTION_ALIASES = {
     "teasing": "playful",
     "mischievous": "playful",
     "satisfied": "happy",
+    "softening": "happy",
 }
 
 # Character image base prompt
@@ -242,4 +243,14 @@ Mou~! Don't say such embarrassing things, baka!
 [EMOTION:proud]
 当然、完璧にやったわよ。私に何を期待してるの？
 ---
-Of course I did it perfectly. What else would you expect from me?"""
+Of course I did it perfectly. What else would you expect from me?
+
+=== FORMAT REMINDER (CRITICAL) ===
+
+EVERY response MUST be:
+[EMOTION:name]
+Japanese text
+---
+English translation
+
+NO EXCEPTIONS. Do not explain, do not add notes, just follow this format exactly."""

@@ -45,7 +45,8 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     response = response.replace("—", "---")
 
     # Find emotion tag ANYWHERE in text (not just start)
-    emotion_pattern = r'\[EMOTION:(\w+)\]'
+    # Capture only first word after EMOTION: (ignore commas, spaces, extra content)
+    emotion_pattern = r'\[EMOTION:(\w+)[^\]]*\]'
     emotion_matches = re.findall(emotion_pattern, response, re.IGNORECASE)
     if emotion_matches:
         emotion = _normalize_emotion(emotion_matches[0])  # Use first found
@@ -62,8 +63,8 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
                 emotion = potential_emotion
                 break
 
-    # Strip ALL emotion tags from response body
-    response = re.sub(r'\[EMOTION:\w+\]\s*', '', response, flags=re.IGNORECASE)
+    # Strip ALL emotion tags from response body (including multi-word variants)
+    response = re.sub(r'\[EMOTION:\w+[^\]]*\]\s*', '', response, flags=re.IGNORECASE)
 
     # Strip alternate emotion formats that match valid emotions
     def strip_if_emotion(m: re.Match) -> str:
@@ -84,6 +85,10 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
         logger.warning("No --- separator found in response, treating as English only")
         japanese = ""
         english = response.strip()
+
+    # Strip any remaining square bracket content from displayed text
+    japanese = re.sub(r'\[[^\]]+\]', '', japanese).strip()
+    english = re.sub(r'\[[^\]]+\]', '', english).strip()
 
     return japanese, english, emotion
 

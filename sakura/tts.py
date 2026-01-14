@@ -31,6 +31,8 @@ def _clean_text_for_tts(text: str) -> str:
     text = re.sub(r'\*[^*]+\*', '', text)
     # Remove parenthetical notes like (Note: ...) or (Translation: ...)
     text = re.sub(r'\([^)]*\)', '', text)
+    # Remove "Note:" and everything after (LLM commentary)
+    text = re.sub(r'Note:.*', '', text, flags=re.IGNORECASE | re.DOTALL)
     # Normalize curly quotes/apostrophes to straight (fixes Unicode mispronunciation)
     text = text.replace(''', "'").replace(''', "'")
     text = text.replace('"', '"').replace('"', '"')
