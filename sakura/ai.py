@@ -17,6 +17,24 @@ def _normalize_emotion(emotion: str) -> str:
     return EMOTION_ALIASES.get(emotion, emotion)
 
 
+def _strip_duplicate_actions(text: str) -> str:
+    """Remove duplicate *action* phrases, keeping first occurrence."""
+    seen = set()
+
+    def replace_duplicate(match: re.Match) -> str:
+        action = match.group(1).lower()  # Case-insensitive comparison
+        if action in seen:
+            return ""  # Remove duplicate (and trailing space if present)
+        seen.add(action)
+        return match.group(0)  # Keep original with any trailing space
+
+    # Match *action* patterns with optional trailing whitespace
+    result = re.sub(r'(\*[^*]+\*)\s*', replace_duplicate, text)
+    # Clean up any double spaces left behind
+    result = re.sub(r'  +', ' ', result)
+    return result.strip()
+
+
 # Priority-based keyword tiers for text emotion detection
 _HIGH_PRIORITY_KEYWORDS = {
     "shy": ["blush", "redden", "fluster", "embarrass"],
@@ -140,6 +158,10 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
         if detected:
             logger.debug(f"Detected emotion from text: {detected}")
             emotion = detected
+
+    # Strip duplicate action phrases (e.g., *giggles softly* appearing multiple times)
+    japanese = _strip_duplicate_actions(japanese)
+    english = _strip_duplicate_actions(english)
 
     return japanese, english, emotion
 

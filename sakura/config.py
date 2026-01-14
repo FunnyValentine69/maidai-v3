@@ -65,6 +65,7 @@ EMOTION_ALIASES = {
     "satisfied": "happy",
     "softening": "happy",
     "overjoyed": "excited",
+    "tsundere": "neutral",
 }
 
 # Character image base prompt
