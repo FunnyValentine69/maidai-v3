@@ -13,7 +13,7 @@ SESSIONS_DIR = HISTORY_DIR / "sessions"
 
 # Ollama settings
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-OLLAMA_MODEL = "llama3.2"
+OLLAMA_MODEL = "dolphin-mistral"
 
 # TTS settings
 TTS_VOICE = "ja-JP-NanamiNeural"
@@ -202,6 +202,11 @@ Guidelines:
 - Be helpful while maintaining your tsundere character
 - Never break character
 - Remember past conversations and reference them naturally when relevant
+- NEVER start every response with the same phrase or reaction
+- VARY your reactions - don't always use *blushes deeply* or *giggles softly*
+- Mix up your openings: sometimes surprised, sometimes annoyed, sometimes pleased
+- Balance your tsundere: sometimes cold, sometimes warm, sometimes flustered
+- Change action phrases: *looks away*, *crosses arms*, *fidgets*, *pouts*, *huffs*
 
 === MANDATORY RESPONSE FORMAT ===
 

@@ -17,6 +17,47 @@ def _normalize_emotion(emotion: str) -> str:
     return EMOTION_ALIASES.get(emotion, emotion)
 
 
+# Priority-based keyword tiers for text emotion detection
+_HIGH_PRIORITY_KEYWORDS = {
+    "shy": ["blush", "redden", "fluster", "embarrass"],
+    "sad": ["tear", "cry", "sob"],
+    "angry": ["angry", "furious", "glare", "scowl"],
+    "surprised": ["shock", "gasp", "stunned"],
+}
+
+_MEDIUM_PRIORITY_KEYWORDS = {
+    "happy": ["giggle", "smile", "grin", "laugh", "happy"],
+    "worried": ["nervous", "anxious", "worried", "uneasy"],
+    "love": ["heart", "loving", "adoring"],
+    "excited": ["excite", "bouncing", "sparkling"],
+    "proud": ["proud", "smug", "triumphant"],
+    "playful": ["wink", "tease", "mischiev"],
+}
+
+_LOW_PRIORITY_KEYWORDS = {
+    "thinking": ["ponder", "hmm", "contemplate"],
+    "tired": ["yawn", "sleepy", "exhaust"],
+    "confused": ["puzzl", "bewilder"],
+}
+
+
+def detect_emotion_from_text(text: str) -> str | None:
+    """Detect emotion from English text using keyword matching.
+
+    Checks priority tiers in order: HIGH → MEDIUM → LOW.
+    Returns first matched emotion or None.
+    """
+    text_lower = text.lower()
+
+    for tier in (_HIGH_PRIORITY_KEYWORDS, _MEDIUM_PRIORITY_KEYWORDS, _LOW_PRIORITY_KEYWORDS):
+        for emotion, keywords in tier.items():
+            for keyword in keywords:
+                if keyword in text_lower:
+                    return emotion
+
+    return None
+
+
 def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     """Parse bilingual response with emotion tag.
 
@@ -89,6 +130,13 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     # Strip any remaining square bracket content from displayed text
     japanese = re.sub(r'\[[^\]]+\]', '', japanese).strip()
     english = re.sub(r'\[[^\]]+\]', '', english).strip()
+
+    # Fallback: detect emotion from English text if no tag was found
+    if emotion == "neutral":
+        detected = detect_emotion_from_text(english)
+        if detected:
+            logger.debug(f"Detected emotion from text: {detected}")
+            emotion = detected
 
     return japanese, english, emotion
 
