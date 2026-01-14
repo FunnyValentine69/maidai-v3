@@ -26,7 +26,9 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     ---
     English text
 
-    Also handles alternate formats: [WORD:name], [name]
+    Also handles:
+    - Emotion tags appearing anywhere in text (extracts first, strips all)
+    - Alternate formats: [WORD:name], [name]
 
     Returns (japanese_text, english_text, emotion).
 
@@ -35,31 +37,42 @@ def parse_bilingual_response(response: str) -> tuple[str, str, str]:
     - Em-dash — → normalize to ---
     - Empty JP section → return empty string
     - No separator → treat entire text as English, JP empty
+    - Multiple emotion tags → use first found, strip all
     """
     emotion = "neutral"
 
     # Normalize em-dash to triple hyphen
     response = response.replace("—", "---")
 
-    # Extract emotion tag - try [EMOTION:name] first
-    pattern = r'^\[EMOTION:(\w+)\]\s*'
-    match = re.match(pattern, response, re.IGNORECASE)
-    if match:
-        emotion = _normalize_emotion(match.group(1))
+    # Find emotion tag ANYWHERE in text (not just start)
+    emotion_pattern = r'\[EMOTION:(\w+)\]'
+    emotion_matches = re.findall(emotion_pattern, response, re.IGNORECASE)
+    if emotion_matches:
+        emotion = _normalize_emotion(emotion_matches[0])  # Use first found
         if emotion not in EMOTIONS:
             logger.warning(f"Invalid emotion '{emotion}', defaulting to neutral")
             emotion = "neutral"
-        response = re.sub(pattern, '', response, flags=re.IGNORECASE)
     else:
-        # Try alternate formats: [WORD:name] or [name]
-        # Uses (?:\w+:)? to optionally match prefix like "HAPPY:"
-        alt_pattern = r'^\[(?:\w+:)?(\w+)\]\s*'
-        alt_match = re.match(alt_pattern, response)
-        if alt_match:
-            potential_emotion = _normalize_emotion(alt_match.group(1))
+        # Try alternate formats: [WORD:name] or [name] anywhere in text
+        alt_pattern = r'\[(?:\w+:)?(\w+)\]'
+        alt_matches = re.findall(alt_pattern, response)
+        for match in alt_matches:
+            potential_emotion = _normalize_emotion(match)
             if potential_emotion in EMOTIONS:
                 emotion = potential_emotion
-                response = re.sub(alt_pattern, '', response)
+                break
+
+    # Strip ALL emotion tags from response body
+    response = re.sub(r'\[EMOTION:\w+\]\s*', '', response, flags=re.IGNORECASE)
+
+    # Strip alternate emotion formats that match valid emotions
+    def strip_if_emotion(m: re.Match) -> str:
+        word = m.group(1)
+        if _normalize_emotion(word) in EMOTIONS:
+            return ''
+        return m.group(0)  # Keep non-emotion brackets
+
+    response = re.sub(r'\[(?:\w+:)?(\w+)\]', strip_if_emotion, response)
 
     # Split on --- separator
     if "---" in response:

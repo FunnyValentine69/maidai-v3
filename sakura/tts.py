@@ -23,10 +23,17 @@ _tts_warned: bool = False
 
 def _clean_text_for_tts(text: str) -> str:
     """Remove action markers and problematic characters for TTS."""
+    # Remove [EMOTION:xxx] tags specifically (in case any slipped through)
+    text = re.sub(r'\[EMOTION:\w+\]', '', text, flags=re.IGNORECASE)
+    # Remove any remaining square bracket content [like this] or [action]
+    text = re.sub(r'\[[^\]]+\]', '', text)
     # Remove asterisk-wrapped actions like *blushes*, *looks away*
     text = re.sub(r'\*[^*]+\*', '', text)
     # Remove parenthetical notes like (Note: ...) or (Translation: ...)
     text = re.sub(r'\([^)]*\)', '', text)
+    # Normalize curly quotes/apostrophes to straight (fixes Unicode mispronunciation)
+    text = text.replace(''', "'").replace(''', "'")
+    text = text.replace('"', '"').replace('"', '"')
     # Replace ellipsis with comma for natural pause (otherwise reads as "ten-ten")
     text = text.replace('...', ',')
     text = text.replace('…', ',')
