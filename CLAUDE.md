@@ -29,7 +29,7 @@ python -m sakura
 | Text-to-Speech | Edge TTS (ja-JP-NanamiNeural, pitch +25Hz, rate +5%) |
 | Audio Playback | afplay (macOS) |
 | Terminal UI | Rich |
-| Emotion Images | Hugging Face Inference API (Animagine XL) |
+| Emotion Images | Local SDXL (Animagine XL 4.0 / NoobAI XL) |
 | Python Version | 3.12+ |
 
 ## Development Rules
@@ -74,12 +74,10 @@ python -m sakura
 ## Environment Variables
 
 ```bash
-# Required
-HF_API_TOKEN=your_huggingface_token
-
 # Optional
 OLLAMA_HOST=http://localhost:11434  # Default Ollama host
 SAKURA_DEBUG=false                   # Enable debug logging
+SAKURA_NSFW=true                     # Enable NSFW image mode (requires setup)
 ```
 
 ## File Structure
@@ -97,9 +95,12 @@ maidai-v3/
 │   ├── emotions.py      # Emotion detection + image display
 │   ├── ui.py            # Rich terminal interface
 │   ├── memory.py        # Conversation history persistence
-│   └── config.py        # Configuration constants
+│   ├── config.py        # Configuration constants
+│   ├── nsfw_prompts.example.py  # NSFW prompt template
+│   └── nsfw_prompts.py  # Local NSFW prompts (gitignored)
 ├── assets/
-│   └── cache/           # Cached emotion images
+│   ├── cache/           # Cached SFW emotion images
+│   └── emotions_nsfw/   # Cached NSFW emotion images (gitignored)
 ├── data/
 │   └── history/         # Saved conversation history
 ├── tests/
@@ -108,6 +109,34 @@ maidai-v3/
 ├── CLAUDE.md            # This file
 └── ARCHITECTURE.md      # System architecture
 ```
+
+## Dual Image System (SFW/NSFW)
+
+Sakura supports two image modes:
+
+| Mode | Model | Folder | Toggle |
+|------|-------|--------|--------|
+| SFW (default) | Animagine XL 4.0 | `assets/cache/` | Default |
+| NSFW | NoobAI XL | `assets/emotions_nsfw/` | `SAKURA_NSFW=true` |
+
+### Setup
+
+```bash
+# Generate SFW images (default)
+python -m sakura.setup
+
+# Generate NSFW images (requires local nsfw_prompts.py)
+python -m sakura.setup --nsfw
+```
+
+### NSFW Configuration
+
+1. Copy `sakura/nsfw_prompts.example.py` to `sakura/nsfw_prompts.py`
+2. Customize prompts in the local file
+3. Run setup with `--nsfw` flag
+4. Enable with `SAKURA_NSFW=true` environment variable
+
+**Note:** `nsfw_prompts.py` and `assets/emotions_nsfw/` are gitignored - content stays local.
 
 ## Common Issues & Fixes
 

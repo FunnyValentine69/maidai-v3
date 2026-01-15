@@ -32,6 +32,32 @@ MAX_RECORDING_S = 30.0
 IMAGE_MODEL = "cagliostrolab/animagine-xl-4.0"
 IMAGE_DEVICE = "mps"  # Apple Silicon
 
+# NSFW Mode settings
+# Toggle via environment: SAKURA_NSFW=true
+NSFW_MODE = os.getenv("SAKURA_NSFW", "").lower() == "true"
+
+# NSFW paths and model (infrastructure - no explicit content)
+NSFW_CACHE_DIR = ASSETS_DIR / "emotions_nsfw"
+NSFW_IMAGE_MODEL = "Laxhar/noobai-XL-1.0"  # Best anime NSFW model
+NSFW_CFG_SCALE = 5
+NSFW_NUM_STEPS = 28
+NSFW_IMAGE_SIZE = (832, 1216)  # Portrait orientation
+
+# Try to import NSFW prompts from local config (gitignored)
+try:
+    from .nsfw_prompts import (
+        NSFW_EMOTION_PROMPTS,
+        NSFW_CHARACTER_PROMPT,
+        NSFW_NEGATIVE_PROMPT,
+    )
+    NSFW_AVAILABLE = True
+except ImportError:
+    # Prompts not configured - NSFW mode unavailable
+    NSFW_AVAILABLE = False
+    NSFW_EMOTION_PROMPTS = {}
+    NSFW_CHARACTER_PROMPT = ""
+    NSFW_NEGATIVE_PROMPT = ""
+
 # Valid emotions
 EMOTIONS = [
     "happy", "sad", "angry", "surprised", "shy",

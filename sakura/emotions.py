@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-from .config import CACHE_DIR, EMOTIONS
+from .config import CACHE_DIR, NSFW_CACHE_DIR, NSFW_MODE, EMOTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -20,17 +20,31 @@ def is_iterm2() -> bool:
 
 
 def get_image_path(emotion: str) -> Path | None:
-    """Get path to cached emotion image if exists."""
+    """Get path to cached emotion image if exists.
+
+    In NSFW mode, tries NSFW_CACHE_DIR first, falls back to CACHE_DIR.
+    """
     if emotion not in EMOTIONS:
         logger.warning(f"Unknown emotion: {emotion}")
         return None
 
-    image_path = CACHE_DIR / f"{emotion}.png"
-    if not image_path.exists():
-        logger.warning(f"Emotion image not found: {image_path}")
-        return None
-
-    return image_path
+    # Choose directory based on NSFW_MODE
+    if NSFW_MODE:
+        image_path = NSFW_CACHE_DIR / f"{emotion}.png"
+        if image_path.exists():
+            return image_path
+        # Fallback to SFW if NSFW image missing
+        image_path = CACHE_DIR / f"{emotion}.png"
+        if not image_path.exists():
+            logger.warning(f"Emotion image not found: {emotion}")
+            return None
+        return image_path
+    else:
+        image_path = CACHE_DIR / f"{emotion}.png"
+        if not image_path.exists():
+            logger.warning(f"Emotion image not found: {image_path}")
+            return None
+        return image_path
 
 
 def _iterm2_display(image_path: Path, width: int = DISPLAY_WIDTH) -> None:

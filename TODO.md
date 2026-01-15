@@ -12,14 +12,16 @@
 - [x] Strip duplicate action phrases
 - [x] Prefix prompting for bilingual format
 - [x] Store bilingual format in conversation history
+- [x] Bilingual goodbye with TTS on exit
+- [x] Auto-insert --- separator (prefix prompting)
+
+## In Progress
+- [ ] NSFW emotion images (NoobAI XL)
 
 ## Remaining
-- [ ] Fix --- separator (still fails ~30% of responses)
-- [ ] Bilingual goodbye with TTS on exit
 - [ ] Voice input (silero-vad needs internet first run)
 
 ## Future Roadmap
-- [ ] Spicy/explicit Sakura images
 - [ ] Voice cloning (RVC)
 - [ ] Live2D integration
 - [ ] LoRA training for character consistency

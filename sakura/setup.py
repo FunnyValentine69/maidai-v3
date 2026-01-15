@@ -2,10 +2,12 @@
 
 import argparse
 import logging
+import os
 from pathlib import Path
 
 import torch
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, EulerDiscreteScheduler
+from huggingface_hub import snapshot_download
 from PIL import Image
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
@@ -17,6 +19,16 @@ from .config import (
     EMOTION_PROMPTS,
     IMAGE_MODEL,
     IMAGE_DEVICE,
+    # NSFW settings
+    NSFW_AVAILABLE,
+    NSFW_CACHE_DIR,
+    NSFW_IMAGE_MODEL,
+    NSFW_CFG_SCALE,
+    NSFW_NUM_STEPS,
+    NSFW_IMAGE_SIZE,
+    NSFW_EMOTION_PROMPTS,
+    NSFW_CHARACTER_PROMPT,
+    NSFW_NEGATIVE_PROMPT,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,13 +56,67 @@ def get_full_prompt(emotion: str) -> str:
     return f"{CHARACTER_BASE_PROMPT}, {QUALITY_TAGS}, {emotion_addition}"
 
 
-def check_image_size(image_path: Path, expected_size: int) -> bool:
+def get_nsfw_prompt(emotion: str) -> str:
+    """Build NSFW prompt with character base + emotion (NoobAI format)."""
+    emotion_addition = NSFW_EMOTION_PROMPTS.get(emotion, "")
+    return f"{NSFW_CHARACTER_PROMPT}, {emotion_addition}"
+
+
+def ensure_model_downloaded(model_id: str, is_nsfw: bool = False) -> None:
+    """Check if model is cached, download if not."""
+    cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+    model_folder = f"models--{model_id.replace('/', '--')}"
+
+    if not os.path.exists(os.path.join(cache_dir, model_folder)):
+        if is_nsfw:
+            console.print("[bold yellow]NSFW Mode: Generating images[/bold yellow]")
+            console.print("[dim]These images are for personal use only.[/dim]")
+            console.print()
+            console.print("[bold]Downloading NoobAI XL (~6-7GB)...[/bold]")
+            console.print("[dim]This may take 15-30 minutes depending on your connection.[/dim]")
+        else:
+            console.print(f"[bold]Downloading {model_id}...[/bold]")
+            console.print("[dim]This may take 10-20 minutes depending on your connection.[/dim]")
+
+        snapshot_download(repo_id=model_id, repo_type="model")
+        console.print("[green]Model downloaded successfully![/green]")
+    else:
+        console.print(f"[dim]Model {model_id} already cached.[/dim]")
+
+
+def load_nsfw_pipeline() -> StableDiffusionXLPipeline:
+    """Load NoobAI XL with v-prediction scheduler."""
+    console.print(f"[dim]Loading {NSFW_IMAGE_MODEL}...[/dim]")
+
+    pipe = StableDiffusionXLPipeline.from_pretrained(
+        NSFW_IMAGE_MODEL,
+        torch_dtype=torch.float32,
+        use_safetensors=True,
+    )
+
+    # Override scheduler with v-prediction
+    pipe.scheduler = EulerDiscreteScheduler.from_config(
+        pipe.scheduler.config,
+        prediction_type="v_prediction",
+    )
+
+    pipe.to(IMAGE_DEVICE)
+    pipe.enable_attention_slicing()
+    pipe.enable_vae_slicing()
+
+    console.print("[green]Model loaded successfully.[/green]")
+    return pipe
+
+
+def check_image_size(image_path: Path, expected_width: int, expected_height: int | None = None) -> bool:
     """Check if existing image matches expected size."""
+    if expected_height is None:
+        expected_height = expected_width
     if not image_path.exists():
         return False
     try:
         with Image.open(image_path) as img:
-            return img.size == (expected_size, expected_size)
+            return img.size == (expected_width, expected_height)
     except Exception:
         return False
 
@@ -79,21 +145,25 @@ def load_pipeline() -> StableDiffusionXLPipeline:
 
 def generate_base_image(
     pipe: StableDiffusionXLPipeline,
-    size: int,
+    width: int,
+    height: int,
     seed: int,
+    prompt: str,
+    negative_prompt: str,
+    cfg_scale: float,
+    num_steps: int,
 ) -> Image.Image:
     """Generate the base neutral image with fixed seed."""
-    prompt = get_full_prompt("neutral")
     # Generator must be on CPU for MPS compatibility
     generator = torch.Generator("cpu").manual_seed(seed)
 
     result = pipe(
         prompt=prompt,
-        negative_prompt=NEGATIVE_PROMPT,
-        width=size,
-        height=size,
-        guidance_scale=GUIDANCE_SCALE,
-        num_inference_steps=NUM_INFERENCE_STEPS,
+        negative_prompt=negative_prompt,
+        width=width,
+        height=height,
+        guidance_scale=cfg_scale,
+        num_inference_steps=num_steps,
         generator=generator,
     )
     return result.images[0]
@@ -102,21 +172,23 @@ def generate_base_image(
 def generate_emotion_image(
     pipe_img2img: StableDiffusionXLImg2ImgPipeline,
     base_image: Image.Image,
-    emotion: str,
     seed: int,
+    prompt: str,
+    negative_prompt: str,
+    cfg_scale: float,
+    num_steps: int,
 ) -> Image.Image:
     """Generate emotion variation using img2img from base."""
-    prompt = get_full_prompt(emotion)
     # Generator must be on CPU for MPS compatibility
     generator = torch.Generator("cpu").manual_seed(seed)
 
     result = pipe_img2img(
         prompt=prompt,
-        negative_prompt=NEGATIVE_PROMPT,
+        negative_prompt=negative_prompt,
         image=base_image,
         strength=IMG2IMG_STRENGTH,
-        guidance_scale=GUIDANCE_SCALE,
-        num_inference_steps=NUM_INFERENCE_STEPS,
+        guidance_scale=cfg_scale,
+        num_inference_steps=num_steps,
         generator=generator,
     )
     return result.images[0]
@@ -173,20 +245,53 @@ def main():
         nargs='+',
         help="Generate only specific emotion(s)",
     )
+    parser.add_argument(
+        "--nsfw",
+        action="store_true",
+        help="Generate NSFW emotion images (requires local nsfw_prompts.py config)",
+    )
     args = parser.parse_args()
+
+    # Check NSFW availability
+    if args.nsfw and not NSFW_AVAILABLE:
+        console.print("[bold red]Error: NSFW mode requires nsfw_prompts.py[/bold red]")
+        console.print()
+        console.print("To enable NSFW mode:")
+        console.print("1. Copy sakura/nsfw_prompts.example.py to sakura/nsfw_prompts.py")
+        console.print("2. Customize the prompts in nsfw_prompts.py")
+        console.print("3. Run this command again")
+        console.print()
+        console.print("[dim]Note: nsfw_prompts.py is gitignored and stays local.[/dim]")
+        return
 
     # Determine which emotions to generate
     target_emotions = args.emotion if args.emotion else EMOTIONS.copy()
 
+    # Set mode-specific settings
+    if args.nsfw:
+        cache_dir = NSFW_CACHE_DIR
+        image_width, image_height = NSFW_IMAGE_SIZE
+        cfg_scale = NSFW_CFG_SCALE
+        num_steps = NSFW_NUM_STEPS
+        negative_prompt = NSFW_NEGATIVE_PROMPT
+        mode_label = "NSFW"
+    else:
+        cache_dir = CACHE_DIR
+        image_width = image_height = args.size
+        cfg_scale = GUIDANCE_SCALE
+        num_steps = NUM_INFERENCE_STEPS
+        negative_prompt = NEGATIVE_PROMPT
+        mode_label = "SFW"
+
     # Ensure cache directory exists
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
     # Check if neutral base needs regeneration
-    neutral_path = CACHE_DIR / "neutral.png"
+    neutral_path = cache_dir / "neutral.png"
     need_new_neutral = (
         (args.force and "neutral" in target_emotions)
         or not neutral_path.exists()
-        or not check_image_size(neutral_path, args.size)
+        or not check_image_size(neutral_path, image_width, image_height)
     )
 
     # Determine which emotions need generation
@@ -200,31 +305,39 @@ def main():
                 or (
                     e != "neutral"
                     and (
-                        not (CACHE_DIR / f"{e}.png").exists()
-                        or not check_image_size(CACHE_DIR / f"{e}.png", args.size)
+                        not (cache_dir / f"{e}.png").exists()
+                        or not check_image_size(cache_dir / f"{e}.png", image_width, image_height)
                     )
                 )
             )
         ]
 
     if not emotions_to_generate:
-        console.print("[green]All emotion images already exist at correct size.[/green]")
+        console.print(f"[green]All {mode_label} emotion images already exist at correct size.[/green]")
         console.print("Use --force to regenerate.")
         return
 
-    console.print(f"[bold magenta]Sakura Image Setup[/bold magenta]")
+    console.print(f"[bold magenta]Sakura Image Setup ({mode_label})[/bold magenta]")
     console.print(f"Generating {len(emotions_to_generate)} emotion image(s)")
-    console.print(f"Size: {args.size}x{args.size}, Seed: {args.seed}")
+    console.print(f"Size: {image_width}x{image_height}, Seed: {args.seed}")
     console.print()
 
+    # Ensure model is downloaded
+    model_id = NSFW_IMAGE_MODEL if args.nsfw else IMAGE_MODEL
+    ensure_model_downloaded(model_id, is_nsfw=args.nsfw)
+
     # Load txt2img pipeline
-    pipe = load_pipeline()
+    if args.nsfw:
+        pipe = load_nsfw_pipeline()
+    else:
+        pipe = load_pipeline()
 
     # Generate base (neutral) image if needed
     base_image: Image.Image | None = None
 
     if need_new_neutral:
         console.print("[dim]Generating base (neutral) image...[/dim]")
+        neutral_prompt = get_nsfw_prompt("neutral") if args.nsfw else get_full_prompt("neutral")
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -233,7 +346,15 @@ def main():
         ) as progress:
             task = progress.add_task("neutral", total=None)
             base_image = generate_with_retry(
-                generate_base_image, pipe, args.size, args.seed
+                generate_base_image,
+                pipe,
+                image_width,
+                image_height,
+                args.seed,
+                neutral_prompt,
+                negative_prompt,
+                cfg_scale,
+                num_steps,
             )
             progress.update(task, completed=True)
 
@@ -284,16 +405,20 @@ def main():
         for emotion in other_emotions:
             progress.update(task, description=f"Generating: {emotion}")
 
+            emotion_prompt = get_nsfw_prompt(emotion) if args.nsfw else get_full_prompt(emotion)
             image = generate_with_retry(
                 generate_emotion_image,
                 pipe_img2img,
                 base_image,
-                emotion,
                 args.seed,
+                emotion_prompt,
+                negative_prompt,
+                cfg_scale,
+                num_steps,
             )
 
             if image is not None:
-                image_path = CACHE_DIR / f"{emotion}.png"
+                image_path = cache_dir / f"{emotion}.png"
                 image.save(image_path)
             else:
                 failed_emotions.append(emotion)
@@ -309,8 +434,8 @@ def main():
         console.print(
             f"[yellow]Warning: Failed to generate: {', '.join(failed_emotions)}[/yellow]"
         )
-    console.print("[bold green]Setup complete![/bold green]")
-    console.print(f"Images saved to: {CACHE_DIR}")
+    console.print(f"[bold green]{mode_label} setup complete![/bold green]")
+    console.print(f"Images saved to: {cache_dir}")
 
 
 if __name__ == "__main__":

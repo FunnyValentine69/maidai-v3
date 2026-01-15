@@ -182,10 +182,12 @@ def detect_emotion(user_input: str, sakura_response: str) -> str:
 
 ### Image Generation (Setup Script)
 
-- **Model**: Animagine XL via Hugging Face Inference API
+- **SFW Model**: Animagine XL 4.0 (local diffusers)
+- **NSFW Model**: NoobAI XL 1.0 (local diffusers, v-prediction scheduler)
 - **When**: One-time setup before first use
-- **Storage**: `assets/cache/{emotion}.png`
-- **Display**: Sixel protocol (iTerm2)
+- **SFW Storage**: `assets/cache/{emotion}.png` (768x768)
+- **NSFW Storage**: `assets/emotions_nsfw/{emotion}.png` (832x1216 portrait)
+- **Display**: iTerm2 inline images
 
 #### Character Design Prompt (Base)
 ```
@@ -219,9 +221,17 @@ Entry point. Initializes all components and starts the main loop.
 
 ### sakura/setup.py
 One-time setup script for generating emotion images.
-- Generates all 14 emotion images via Hugging Face API
-- Saves to assets/cache/
-- Run before first use: `python -m sakura.setup`
+- **SFW mode**: Uses Animagine XL 4.0, generates 768x768 images
+- **NSFW mode** (`--nsfw`): Uses NoobAI XL with v-prediction scheduler, generates 832x1216 portrait images
+- Saves to `assets/cache/` (SFW) or `assets/emotions_nsfw/` (NSFW)
+- Uses img2img workflow for character consistency across emotions
+- Run: `python -m sakura.setup` or `python -m sakura.setup --nsfw`
+
+### sakura/nsfw_prompts.py (gitignored)
+Local configuration for NSFW image prompts.
+- Copy from `nsfw_prompts.example.py` and customize
+- Contains character prompt and emotion-specific prompts
+- Never committed to repository
 
 ### sakura/core.py
 Main conversation loop orchestration.
@@ -330,21 +340,24 @@ data/history/
 
 ### Cached Emotion Images
 ```
-assets/cache/
-├── happy.png
-├── sad.png
-├── angry.png
-├── surprised.png
-├── shy.png
-├── thinking.png
-├── excited.png
-├── tired.png
-├── confused.png
-├── neutral.png
-├── love.png
-├── worried.png
-├── proud.png
-└── playful.png
+assets/
+├── cache/                    # SFW images (768x768)
+│   ├── happy.png
+│   ├── sad.png
+│   ├── angry.png
+│   ├── surprised.png
+│   ├── shy.png
+│   ├── thinking.png
+│   ├── excited.png
+│   ├── tired.png
+│   ├── confused.png
+│   ├── neutral.png
+│   ├── love.png
+│   ├── worried.png
+│   ├── proud.png
+│   └── playful.png
+└── emotions_nsfw/            # NSFW images (832x1216, gitignored)
+    └── (same 14 emotions)
 ```
 
 ## System Prompt

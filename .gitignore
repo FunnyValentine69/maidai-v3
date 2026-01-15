@@ -22,4 +22,8 @@ env/
 
 # Project specific
 assets/cache/
+assets/emotions_nsfw/
 data/history/
+
+# NSFW local config (explicit content)
+sakura/nsfw_prompts.py
