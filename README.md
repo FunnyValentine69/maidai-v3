@@ -15,9 +15,11 @@ A tsundere Japanese maid AI that runs entirely on local AI. Voice chat with your
 - **Conversation Memory** - Persistent memory across sessions with automatic summarization
 - **Tsundere Personality** - Sakura is cold at first but gradually warms up to you
 
-## Screenshots
+## Sakura
 
-<!-- TODO: Add screenshots -->
+<p align="center">
+  <img src="./assets/sakura.png" width="400" alt="Sakura — MaidAI v3"/>
+</p>
 
 ## Installation
 
