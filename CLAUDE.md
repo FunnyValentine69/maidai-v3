@@ -25,7 +25,7 @@ python -m sakura
 | Component | Technology |
 |-----------|------------|
 | AI Model | Ollama + dolphin-mistral (local, uncensored) |
-| Speech Recognition | faster-whisper (local) |
+| Speech Recognition | mlx-whisper (Apple Silicon) |
 | Text-to-Speech | Edge TTS (ja-JP-NanamiNeural, pitch +25Hz, rate +5%) |
 | Audio Playback | afplay (macOS) |
 | Terminal UI | Rich |
@@ -76,7 +76,7 @@ python -m sakura
 ```bash
 # Optional
 OLLAMA_HOST=http://localhost:11434  # Default Ollama host
-SAKURA_DEBUG=false                   # Enable debug logging
+SAKURA_DEBUG=1                       # Set any value to enable debug logging
 SAKURA_NSFW=true                     # Enable NSFW image mode (requires setup)
 ```
 
@@ -103,9 +103,10 @@ maidai-v3/
 │   └── emotions_nsfw/   # Cached NSFW emotion images (gitignored)
 ├── data/
 │   └── history/         # Saved conversation history
-├── tests/
 ├── requirements.txt
 ├── pyproject.toml
+├── README.md
+├── LICENSE
 ├── CLAUDE.md            # This file
 └── ARCHITECTURE.md      # System architecture
 ```
@@ -146,16 +147,16 @@ python -m sakura.setup --nsfw
 
 ### Voice recognition not working
 - Ensure microphone permissions are granted
-- Check faster-whisper model is downloaded
-- Verify silence detection threshold
+- Check mlx-whisper model downloads successfully on first run
+- silero-vad requires internet on first launch (loaded via torch.hub)
 
 ### Ollama connection failed
 - Verify Ollama is running: `ollama list`
 - Check OLLAMA_HOST environment variable
 
 ### Images not generating
-- Verify HF_API_TOKEN is set
-- Check Hugging Face API rate limits
+- Verify Hugging Face model is downloaded (`python -m sakura.setup`)
+- Ensure sufficient disk space for SDXL model (~7GB)
 
 ## Git Workflow
 

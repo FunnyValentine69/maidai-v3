@@ -45,7 +45,7 @@ python -m sakura.setup
 ```
 
 This script:
-1. Connects to Hugging Face Inference API (Animagine XL)
+1. Loads Animagine XL 4.0 locally via diffusers pipeline
 2. Generates 14 emotion images with consistent character design
 3. Saves images to `assets/cache/`
 4. Only needs to run once
@@ -98,7 +98,7 @@ This script:
               │                               ▼
               │                  ┌──────────────────────┐
               │                  │ Transcribe with      │
-              │                  │ faster-whisper       │
+              │                  │ mlx-whisper          │
               │                  └──────────────────────┘
               │                               │
               └───────────────┬───────────────┘
@@ -107,7 +107,7 @@ This script:
 ┌─────────────────────────────────────────────────────────────────┐
 │  Process user input:                                             │
 │  1. Add to conversation history                                  │
-│  2. Send to Ollama (llama3.2) with system prompt + history       │
+│  2. Send to Ollama (dolphin-mistral) with system prompt + history│
 │  3. Receive Sakura's response                                    │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -123,7 +123,7 @@ This script:
 ┌─────────────────────────────────────────────────────────────────┐
 │  Display Emotion Image:                                          │
 │  1. Load cached image for detected emotion                       │
-│  2. Display in terminal via Sixel protocol                       │
+│  2. Display in terminal via iTerm2 inline images                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -244,15 +244,14 @@ Ollama integration with bilingual response parsing.
 - System prompt with Sakura's personality and bilingual format requirements
 - Bilingual response parser: extracts Japanese, English, and emotion
 - Conversation history management for context
-- API calls to local llama3.2
+- API calls to local dolphin-mistral
 - Context-aware bilingual greeting generation
 
 ### sakura/speech.py
 Voice input handling.
-- faster-whisper for transcription
-- Silence detection (VAD) for automatic stop
+- mlx-whisper for transcription (Apple Silicon optimized)
+- silero-vad for silence detection and automatic stop
 - Microphone recording with spacebar trigger
-- Spacebar output suppression
 
 ### sakura/tts.py
 Bilingual text-to-speech output.
@@ -264,10 +263,10 @@ Bilingual text-to-speech output.
 - Audio playback via afplay (macOS)
 
 ### sakura/emotions.py
-Emotion detection and image display.
-- Analyzes response + user input for emotion
-- Loads cached images from assets/cache/
-- Sixel display for iTerm2
+Emotion image loading and display.
+- Loads cached images from assets/cache/ (or assets/emotions_nsfw/ in NSFW mode)
+- iTerm2 inline image display
+- Emotion detection is handled in ai.py (parse_bilingual_response + keyword fallback)
 
 ### sakura/ui.py
 Rich terminal interface with JRPG-style dialogue.
@@ -394,7 +393,7 @@ H-hello, Goshujin-sama... It's not like I was waiting for you or anything!
 | AI Response | Ollama timeout | Retry once, then generic response |
 | TTS | Edge TTS fails | Display text only |
 | Audio Playback | afplay fails | Display text only |
-| Image Display | Sixel fails | Skip image display |
+| Image Display | iTerm2 display fails | Skip image display |
 | Memory | Load fails | Start fresh (warn user) |
 | Memory | Save fails | Continue without persistence |
 | Summarization | Fails | Keep using full history until fixed |

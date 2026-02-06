@@ -20,7 +20,3 @@ diffusers>=0.25.0
 accelerate>=0.25.0
 huggingface-hub>=0.20.0
 Pillow>=10.0.0
-term-image>=0.7.0
-
-# Utilities
-httpx>=0.25.0
