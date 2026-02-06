@@ -23,7 +23,7 @@ A tsundere Japanese maid AI that runs entirely on local AI. Voice chat with your
 
 ## Demo
 
-https://github.com/FunnyValentine69/maidai-v3/raw/main/assets/sakura-demo.mp4
+<video src="https://github.com/FunnyValentine69/maidai-v3/raw/main/assets/sakura-demo.mp4" controls width="600"></video>
 
 ## Installation
 
