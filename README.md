@@ -14,7 +14,6 @@
 <p align="center">
   <a href="#-features"><strong>Features</strong></a> &nbsp;&bull;&nbsp;
   <a href="#-quick-start"><strong>Quick Start</strong></a> &nbsp;&bull;&nbsp;
-  <a href="#-demo"><strong>Demo</strong></a> &nbsp;&bull;&nbsp;
   <a href="#-architecture"><strong>Architecture</strong></a> &nbsp;&bull;&nbsp;
   <a href="#-documentation"><strong>Docs</strong></a>
 </p>
