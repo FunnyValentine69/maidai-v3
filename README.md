@@ -92,6 +92,14 @@ Sakura is cold at first but gradually warms up. She calls you ご主人様 (Gosh
 
 </td>
 </tr>
+<tr>
+<td colspan="2" valign="top">
+
+### 🔓 Uncensored AI
+Powered by dolphin-mistral, an unfiltered model with no refusal guardrails — enabling authentic and unrestricted character roleplay.
+
+</td>
+</tr>
 </table>
 
 > [!NOTE]
