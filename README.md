@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/sakura.png" width="350" alt="Sakura — MaidAI v3"/>
+  <img src="./assets/sakura-animated.gif" width="350" alt="Sakura — MaidAI v3"/>
 </p>
 
 <h3 align="center">
@@ -127,12 +127,13 @@ cd maidai-v3
 pip install -r requirements.txt
 ollama pull dolphin-mistral
 export HF_API_TOKEN=your_token_here
-python -m sakura.setup
+python -m sakura.setup       # Generate emotion images (one-time)
+python -m sakura.animate     # Generate animated character GIF (one-time)
 python -m sakura
 ```
 
 > [!TIP]
-> You only need to run `python -m sakura.setup` once. After that, just `python -m sakura` to start chatting.
+> You only need to run `sakura.setup` and `sakura.animate` once. After that, just `python -m sakura` to start chatting.
 
 ### Controls
 
@@ -198,9 +199,11 @@ maidai-v3/
 │   ├── ui.py                 # Rich terminal UI (JRPG-style panels)
 │   ├── config.py             # Configuration constants
 │   ├── setup.py              # One-time emotion image generation
+│   ├── animate.py            # Animated GIF generation (AnimateDiff)
 │   └── nsfw_prompts.example.py  # NSFW prompt template
 ├── assets/
-│   ├── sakura.png            # Character art
+│   ├── sakura.png            # Static character art (animation source)
+│   ├── sakura-animated.gif   # Animated character idle loop
 │   ├── sakura-demo.svg       # Animated terminal demo
 │   └── cache/                # Cached emotion images (14 emotions)
 ├── data/
@@ -294,6 +297,7 @@ Images are generated locally with [Animagine XL 4.0](https://huggingface.co/cagl
 | Speech Recognition | [mlx-whisper](https://github.com/ml-explore/mlx-examples) (Apple Silicon) |
 | Voice Activity Detection | [silero-vad](https://github.com/snakers4/silero-vad) |
 | Emotion Images | [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) via [diffusers](https://github.com/huggingface/diffusers) |
+| Character Animation | [AnimateDiff](https://github.com/guoyww/AnimateDiff) + [Counterfeit V3.0](https://huggingface.co/gsdf/Counterfeit-V3.0) |
 | Terminal UI | [Rich](https://github.com/Textualize/rich) |
 
 ---

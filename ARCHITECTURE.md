@@ -227,6 +227,17 @@ One-time setup script for generating emotion images.
 - Uses img2img workflow for character consistency across emotions
 - Run: `python -m sakura.setup` or `python -m sakura.setup --nsfw`
 
+### sakura/animate.py
+One-time script for generating animated character GIF using AnimateDiff.
+- **Pipeline**: AnimateDiffVideoToVideoPipeline (SD 1.5)
+- **Base model**: Counterfeit V3.0 (anime-focused SD 1.5)
+- **Motion**: guoyww/animatediff-motion-adapter-v1-5-3
+- **Input**: `assets/sakura.png` (or any source image)
+- **Output**: `assets/sakura-animated.gif` (ping-pong loop, ~8-9MB)
+- **Resolution**: 768x768, 24 frames at 12 FPS
+- Uses low strength (0.35) for subtle idle animation (breathing, hair sway)
+- Run: `python -m sakura.animate`
+
 ### sakura/nsfw_prompts.py (gitignored)
 Local configuration for NSFW image prompts.
 - Copy from `nsfw_prompts.example.py` and customize
@@ -336,6 +347,13 @@ data/history/
 3. Combine for AI context: summary + recent messages
 4. Create new session file for current conversation
 5. Periodically trigger summarization when history grows large
+
+### Character Animation
+```
+assets/
+├── sakura.png               # Static source image (input to animate.py)
+├── sakura-animated.gif      # AnimateDiff idle animation (ping-pong GIF loop)
+```
 
 ### Cached Emotion Images
 ```

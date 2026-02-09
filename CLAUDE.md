@@ -16,6 +16,9 @@ ollama pull dolphin-mistral
 # Generate emotion images (one-time setup)
 python -m sakura.setup
 
+# Generate animated character GIF (one-time setup)
+python -m sakura.animate
+
 # Run Sakura
 python -m sakura
 ```
@@ -30,6 +33,7 @@ python -m sakura
 | Audio Playback | afplay (macOS) |
 | Terminal UI | Rich |
 | Emotion Images | Local SDXL (Animagine XL 4.0 / NoobAI XL) |
+| Character Animation | AnimateDiff + Counterfeit V3.0 (SD 1.5) |
 | Python Version | 3.12+ |
 
 ## Development Rules
@@ -88,6 +92,7 @@ maidai-v3/
 │   ├── __init__.py
 │   ├── __main__.py      # Entry point
 │   ├── setup.py         # One-time image generation
+│   ├── animate.py       # Animated GIF generation (AnimateDiff)
 │   ├── core.py          # Main conversation loop
 │   ├── ai.py            # Ollama integration
 │   ├── speech.py        # Whisper STT + silence detection
@@ -99,6 +104,8 @@ maidai-v3/
 │   ├── nsfw_prompts.example.py  # NSFW prompt template
 │   └── nsfw_prompts.py  # Local NSFW prompts (gitignored)
 ├── assets/
+│   ├── sakura.png       # Static character art (animation source)
+│   ├── sakura-animated.gif  # Animated idle loop for README
 │   ├── cache/           # Cached SFW emotion images
 │   └── emotions_nsfw/   # Cached NSFW emotion images (gitignored)
 ├── data/

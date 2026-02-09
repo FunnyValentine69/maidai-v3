@@ -18,8 +18,8 @@
 - [x] Voice input (mlx-whisper + silero-vad)
 
 ## Future Roadmap
+- [x] Animated character GIF for GitHub README (AnimateDiff)
 - [ ] Voice cloning (RVC)
-- [ ] Live2D integration
 - [ ] LoRA training for character consistency
 - [ ] Multi-waifu Command Center (CrewAI/AutoGen)
 

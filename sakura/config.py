@@ -32,6 +32,22 @@ MAX_RECORDING_S = 30.0
 IMAGE_MODEL = "cagliostrolab/animagine-xl-4.0"
 IMAGE_DEVICE = "mps"  # Apple Silicon
 
+# Animation settings (AnimateDiff via diffusers)
+# Tuned to maximize quality while keeping output GIF under 10MB (GitHub limit)
+ANIMATE_BASE_MODEL = "gsdf/Counterfeit-V3.0"          # SD 1.5 anime model
+ANIMATE_MOTION_ADAPTER = "guoyww/animatediff-motion-adapter-v1-5-3"
+ANIMATE_VAE = "stabilityai/sd-vae-ft-mse"
+ANIMATE_NUM_FRAMES = 24         # More frames = smoother animation
+ANIMATE_WIDTH = 768              # Higher res (max practical for SD 1.5)
+ANIMATE_HEIGHT = 768
+ANIMATE_STRENGTH = 0.35         # Low = subtle motion, preserves original look
+ANIMATE_GUIDANCE_SCALE = 7.5
+ANIMATE_NUM_STEPS = 25          # More steps = better quality
+ANIMATE_FPS = 12                # Smoother playback
+ANIMATE_SEED = 42
+ANIMATE_OUTPUT = ASSETS_DIR / "sakura-animated.gif"
+ANIMATE_SOURCE = ASSETS_DIR / "sakura.png"
+
 # NSFW Mode settings
 # Toggle via environment: SAKURA_NSFW=true
 NSFW_MODE = os.getenv("SAKURA_NSFW", "").lower() == "true"
