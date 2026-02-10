@@ -63,21 +63,21 @@ def load_pipeline(device: str) -> AnimateDiffVideoToVideoPipeline:
     """Load AnimateDiff video-to-video pipeline with MPS optimizations."""
     console.print(f"[dim]Loading motion adapter: {ANIMATE_MOTION_ADAPTER}...[/dim]")
     adapter = MotionAdapter.from_pretrained(
-        ANIMATE_MOTION_ADAPTER, torch_dtype=torch.float32
+        ANIMATE_MOTION_ADAPTER, torch_dtype=torch.float16
     )
 
     console.print(f"[dim]Loading base model: {ANIMATE_BASE_MODEL}...[/dim]")
     pipe = AnimateDiffVideoToVideoPipeline.from_pretrained(
         ANIMATE_BASE_MODEL,
         motion_adapter=adapter,
-        torch_dtype=torch.float32,
+        torch_dtype=torch.float16,
     )
 
     # Use recommended VAE for better color reproduction
     from diffusers import AutoencoderKL
 
     console.print(f"[dim]Loading VAE: {ANIMATE_VAE}...[/dim]")
-    vae = AutoencoderKL.from_pretrained(ANIMATE_VAE, torch_dtype=torch.float32)
+    vae = AutoencoderKL.from_pretrained(ANIMATE_VAE, torch_dtype=torch.float16)
     pipe.vae = vae
 
     pipe.scheduler = DDIMScheduler.from_pretrained(

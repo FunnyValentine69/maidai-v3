@@ -17,6 +17,7 @@ pydub>=0.25.0  # For bilingual audio concatenation (requires ffmpeg)
 
 # Image generation (local)
 diffusers>=0.25.0
+transformers>=4.36.0
 accelerate>=0.25.0
 huggingface-hub>=0.20.0
 Pillow>=10.0.0
