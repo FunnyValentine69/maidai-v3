@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/sakura-animated.gif" width="350" alt="Sakura — MaidAI v3"/>
+  <img src="./assets/sakura.png" width="350" alt="Sakura — MaidAI v3"/>
 </p>
 
 <h3 align="center">
