@@ -34,12 +34,12 @@ IMAGE_DEVICE = "mps"  # Apple Silicon
 
 # Animation settings (AnimateDiff via diffusers)
 # Tuned to maximize quality while keeping output GIF under 10MB (GitHub limit)
-ANIMATE_BASE_MODEL = "stablediffusionapi/counterfeit-v30"  # SD 1.5 anime model (diffusers format)
+ANIMATE_BASE_MODEL = "gsdf/Counterfeit-V3.0"          # SD 1.5 anime model
 ANIMATE_MOTION_ADAPTER = "guoyww/animatediff-motion-adapter-v1-5-3"
 ANIMATE_VAE = "stabilityai/sd-vae-ft-mse"
-ANIMATE_NUM_FRAMES = 8          # Reduced for M1 Max memory (32GB) + float16
-ANIMATE_WIDTH = 512              # Reduced for M1 Max memory
-ANIMATE_HEIGHT = 512
+ANIMATE_NUM_FRAMES = 24         # More frames = smoother animation
+ANIMATE_WIDTH = 768              # Higher res (max practical for SD 1.5)
+ANIMATE_HEIGHT = 768
 ANIMATE_STRENGTH = 0.35         # Low = subtle motion, preserves original look
 ANIMATE_GUIDANCE_SCALE = 7.5
 ANIMATE_NUM_STEPS = 25          # More steps = better quality
