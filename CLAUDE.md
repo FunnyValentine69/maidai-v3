@@ -104,8 +104,8 @@ maidai-v3/
 │   ├── nsfw_prompts.example.py  # NSFW prompt template
 │   └── nsfw_prompts.py  # Local NSFW prompts (gitignored)
 ├── assets/
+│   ├── sakura.gif       # Animated blinking character (README display, 45fps)
 │   ├── sakura.png       # Static character art (animation source)
-│   ├── sakura-animated.gif  # Animated idle loop for README
 │   ├── cache/           # Cached SFW emotion images
 │   └── emotions_nsfw/   # Cached NSFW emotion images (gitignored)
 ├── data/

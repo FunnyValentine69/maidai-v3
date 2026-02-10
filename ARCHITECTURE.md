@@ -233,7 +233,7 @@ One-time script for generating animated character GIF using AnimateDiff.
 - **Base model**: Counterfeit V3.0 (anime-focused SD 1.5)
 - **Motion**: guoyww/animatediff-motion-adapter-v1-5-3
 - **Input**: `assets/sakura.png` (or any source image)
-- **Output**: `assets/sakura-animated.gif` (ping-pong loop, ~8-9MB)
+- **Output**: `assets/sakura.gif` (looping blink animation, ~10MB, converted from ComfyUI MP4)
 - **Resolution**: 768x768, 24 frames at 12 FPS
 - Uses low strength (0.35) for subtle idle animation (breathing, hair sway)
 - Run: `python -m sakura.animate`
@@ -351,8 +351,8 @@ data/history/
 ### Character Animation
 ```
 assets/
+├── sakura.gif               # Animated blinking character (README display, 45fps ComfyUI)
 ├── sakura.png               # Static source image (input to animate.py)
-├── sakura-animated.gif      # AnimateDiff idle animation (ping-pong GIF loop)
 ```
 
 ### Cached Emotion Images

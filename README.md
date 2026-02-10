@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/sakura.png" width="350" alt="Sakura — MaidAI v3"/>
+  <img src="./assets/sakura.gif" width="350" alt="Sakura — MaidAI v3"/>
 </p>
 
 <h3 align="center">
@@ -202,8 +202,8 @@ maidai-v3/
 │   ├── animate.py            # Animated GIF generation (AnimateDiff)
 │   └── nsfw_prompts.example.py  # NSFW prompt template
 ├── assets/
+│   ├── sakura.gif            # Animated blinking character (README display)
 │   ├── sakura.png            # Static character art (animation source)
-│   ├── sakura-animated.gif   # Animated character idle loop
 │   ├── sakura-demo.svg       # Animated terminal demo
 │   └── cache/                # Cached emotion images (14 emotions)
 ├── data/
