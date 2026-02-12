@@ -27,3 +27,12 @@ data/history/
 
 # NSFW local config (explicit content)
 sakura/nsfw_prompts.py
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Secrets
+.env
+
+# Local docs
+BUSINESS_IDEAS.md
