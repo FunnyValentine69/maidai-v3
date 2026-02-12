@@ -22,7 +22,3 @@
 - [ ] Voice cloning (RVC)
 - [ ] LoRA training for character consistency
 - [ ] Multi-waifu Command Center (CrewAI/AutoGen)
-
-## Business Ideas (Back Burner)
-- [ ] Para-social AI companion SaaS targeting gacha gamers
-- [ ] Pitch: "Your waifu. Your data. No company can take her away."
